@@ -87,6 +87,12 @@ def _pkgconfig_tool_impl(ctx):
         "MAKE": make_data.path,
     })
 
+    # Darwin clang really hates it when these are relative
+    for var in "DEVELOPER_DIR", "SDKROOT":
+        if var not in env:
+            continue
+        env[var] = absolutize(ctx.workspace_name, env[var], True)
+
     configure_env = " ".join(["%s=\"%s\"" % (key, value) for key, value in env.items()])
     script = [
         "%s ./configure %s" % (configure_env, " ".join(configure_options)),
